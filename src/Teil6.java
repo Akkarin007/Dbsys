@@ -6,8 +6,10 @@ public class Teil6 {
 
         String name = null;
         String passwd = null;
-        String land, anreise, abreise;
-        int ausstattung = 0;
+        String land = null;
+        String anreise = null;
+        String abreise = null;
+        int ausstattung = -1;
 
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Connection conn = null;
@@ -16,24 +18,25 @@ public class Teil6 {
 
 
         System.out.println("Benutzername: ");
-        name = "dbsys15";
+        name = "dbsys26";
         System.out.println("Passwort:");
         passwd = "lolsql";
 //
-//        try {
-//
-//            System.out.println("Land: ");
-//            land = in.readLine();
-//            System.out.println("Anreise: (yy-mm-dd)");
-//            anreise = in.readLine();
-//            System.out.println("Abreise: (yy-mm-dd)");
-//            abreise = in.readLine();
-//            System.out.println("Ausstattung:");
-//            ausstattung = Integer.parseInt(in.readLine());
-//        } catch (IOException e) {
-//            System.out.println("Fehler beim Lesen der Eingabe: " + e);
-//            System.exit(-1);
-//        }
+        try {
+
+            System.out.println("Land: ");
+            land = in.readLine();
+            System.out.println("Anreise: (yy-mm-dd)");
+            anreise = in.readLine();
+            System.out.println("Abreise: (yy-mm-dd)");
+            abreise = in.readLine();
+            System.out.println("Ausstattung:");
+            String tmp = in.readLine();
+            if (!tmp.isEmpty()) ausstattung = Integer.parseInt(tmp);
+        } catch (IOException e) {
+            System.out.println("Fehler beim Lesen der Eingabe: " + e);
+            System.exit(-1);
+        }
 
 
         System.out.println("");
@@ -48,40 +51,16 @@ public class Teil6 {
 
             stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
-            String myUpdateQuery = "INSERT INTO pers(pnr, name, jahrg, eindat, gehalt, anr) " +
-                    "VALUES('124', 'Huber', 1980, sysdate, 80000, 'K51')";                // Mitarbeiter hinzufügen
+            String myUpdateQuery = insertBuchung(99, "2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
             stmt.executeUpdate(myUpdateQuery);
 
-            String mySelectQuery = "Select * from dbsys26.ferienwohnung";
-
-                    /*
-                    "select F.name, avg(B.sterne) as bewertung " +
-                    "from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
-                    "    inner join dbsys26.Adresse adr using(adressid) " +
-                    "    inner join dbsys26.Land L using(landid) " +
-                    "    inner join dbsys26.FerienAusstattung FA using(ferienwid) " +
-                    "where " +
-                    "    dbsys26.L.name = 'Deutschland'  " +
-                    "    AND FA.ausstattungsid = 2 " +
-                    "    AND F.name not in ( " +
-                    "        select  F.name " +
-                    "        from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
-                    "        where ((b.anreise  between to_date('2015-01-01', 'yy-mm-dd') and to_DATE('2015-01-03', 'yy-mm-dd'))) " +
-                    "        OR ((b.abreise between to_date('2015-01-01', 'yy-mm-dd') and to_DATE('2015-01-03', 'yy-mm-dd'))) " +
-                    "        or (b.anreise < to_date('2015-01-01', 'yy-mm-dd') and b.abreise > to_DATE('2015-01-03', 'yy-mm-dd'))) " +
-                    "group by F.name " +
-                    "order by avg(B.sterne)";
-                  */
-
+            String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, ausstattung);
             rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
 
-            System.out.println("cccccc " + rset);
-
             while (rset.next())
-                System.out.println(rset.getString("name")+
-                                    rset.getDouble("bewertung"));
+                System.out.printf("%15s \t %.1f\n", rset.getString("name"), rset.getDouble("bewertung"));
 
-//            myUpdateQuery = "DELETE FROM pers WHERE pnr = '124'";
+//            myUpdateQuery = "DELETE FROM dbsys26.buchung WHERE buchungsid = '99'";
 //            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
 
             stmt.close();                                                                // Verbindung trennen
@@ -106,4 +85,35 @@ public class Teil6 {
             System.exit(-1);
         }
     }
+
+    private static String insertBuchung(int buchungsid, String anreise, String abreise, String ferienwohnung, int kundenid) {
+        return "INSERT INTO buchung (buchungsid, buchungsdatum, anreise, abreise, ferienwid, sterne, datumbewertung, rechnungsid, rechnungsdatum, rechnungsbetrag, kundenid) " +
+                "VALUES (" + buchungsid + ", to_date('2020-01-14', 'yy-mm-dd'), to_date('" + anreise + "', 'yy-mm-dd'), to_date('" + abreise + "', 'yy-mm-dd'), " +
+                "(select f.ferienwid from dbsys26.ferienwohnung f where f.name = '" + ferienwohnung + "'), " +
+                " null, null, " +
+                "rechungsseq.nextval, to_date('2015-02-10', 'yy-mm-dd'), 9999, " + kundenid + ") ";
+    }
+
+    public static String sucheFerienWohnung(String land, String anreise, String abreise, int ausstattung) {
+        String ausstattungsFilter = "";
+        if (ausstattung != -1) ausstattungsFilter = "    AND FA.ausstattungsid = " + ausstattung + " ";
+
+        return "select F.name, avg(B.sterne) as bewertung " +
+                "from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
+                "    inner join dbsys26.Adresse adr using(adressid) " +
+                "    inner join dbsys26.Land L using(landid) " +
+                "    inner join dbsys26.FerienAusstattung FA using(ferienwid) " +
+                "where " +
+                "    dbsys26.L.name = '" + land + "'  " +
+                ausstattungsFilter +
+                "    AND F.name not in ( " +
+                "        select  F.name " +
+                "        from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
+                "        where ((b.anreise  between to_date('" + anreise + "', 'yy-mm-dd') and to_DATE('" + abreise + "', 'yy-mm-dd'))) " +
+                "        OR ((b.abreise between to_date('" + anreise + "', 'yy-mm-dd') and to_DATE('" + abreise + "', 'yy-mm-dd'))) " +
+                "        or (b.anreise < to_date('" + anreise + "', 'yy-mm-dd') and b.abreise > to_DATE('" + abreise + "', 'yy-mm-dd'))) " +
+                "group by F.name " +
+                "order by avg(B.sterne)";
+    }
 }
+
