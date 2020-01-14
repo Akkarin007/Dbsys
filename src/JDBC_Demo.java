@@ -11,37 +11,34 @@ public class JDBC_Demo {
         Statement stmt = null;
         ResultSet rset = null;
 
-        try {
-            System.out.println("Benutzername: ");
-            name = in.readLine();
-            System.out.println("Passwort:");
-            passwd = in.readLine();
-        } catch (IOException e) {
-            System.out.println("Fehler beim Lesen der Eingabe: " + e);
-            System.exit(-1);
-        }
+
+        System.out.println("Benutzername: ");
+        name = "dbsys15";
+        System.out.println("Passwort:");
+        passwd = "lolsql";
+
 
         System.out.println("");
 
         try {
-            DriverManager.registerDriver(new oracle.jdbc.OracleDriver()); 				// Treiber laden
+            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());                // Treiber laden
             String url = "jdbc:oracle:thin:@oracle12c.in.htwg-konstanz.de:1521:ora12c"; // String für DB-Connection
-            conn = DriverManager.getConnection(url, name, passwd); 						// Verbindung erstellen
+            conn = DriverManager.getConnection(url, name, passwd);                        // Verbindung erstellen
 
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE); 			// Transaction Isolations-Level setzen
-            conn.setAutoCommit(false);													// Kein automatisches Commit
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);            // Transaction Isolations-Level setzen
+            conn.setAutoCommit(false);                                                    // Kein automatisches Commit
 
-            stmt = conn.createStatement(); 												// Statement-Objekt erzeugen
+            stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
             String myUpdateQuery = "INSERT INTO pers(pnr, name, jahrg, eindat, gehalt, anr) " +
-                    "VALUES('124', 'Huber', 1980, sysdate, 80000, 'K51')";				// Mitarbeiter hinzufügen
+                    "VALUES('124', 'Huber', 1980, sysdate, 80000, 'K51')";                // Mitarbeiter hinzufügen
             stmt.executeUpdate(myUpdateQuery);
 
             String mySelectQuery = "SELECT pnr, name, jahrg, TO_CHAR(eindat, 'YYYY') " +
                     "AS eindat, gehalt, beruf, anr, vnr FROM pers";
-            rset = stmt.executeQuery(mySelectQuery);									// Query ausführen
+            rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
 
-            while(rset.next())
+            while (rset.next())
                 System.out.println(rset.getInt("pnr") + " "
                         + rset.getString("name") + " "
                         + rset.getInt("jahrg") + " "
@@ -52,12 +49,12 @@ public class JDBC_Demo {
                         + rset.getInt("vnr"));
 
             myUpdateQuery = "DELETE FROM pers WHERE pnr = '124'";
-            stmt.executeUpdate(myUpdateQuery);											// Mitarbeiter wieder löschen
+            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
 
-            stmt.close();																// Verbindung trennen
+            stmt.close();                                                                // Verbindung trennen
             conn.commit();
             conn.close();
-        } catch (SQLException se) {														// SQL-Fehler abfangen
+        } catch (SQLException se) {                                                        // SQL-Fehler abfangen
             System.out.println();
             System.out
                     .println("SQL Exception occurred while establishing connection to DBS: "
@@ -69,7 +66,7 @@ public class JDBC_Demo {
             System.out.println("EXITING WITH FAILURE ... !!!");
             System.out.println();
             try {
-                conn.rollback();														// Rollback durchführen
+                conn.rollback();                                                        // Rollback durchführen
             } catch (SQLException e) {
                 e.printStackTrace();
             }
