@@ -19,21 +19,21 @@ public class Teil6 {
         name = "dbsys15";
         System.out.println("Passwort:");
         passwd = "lolsql";
-
-        try {
-
-            System.out.println("Land: ");
-            land = in.readLine();
-            System.out.println("Anreise:");
-            anreise = in.readLine();
-            System.out.println("Abreise:");
-            abreise = in.readLine();
-            System.out.println("Ausstattung:");
-            ausstattung = Integer.parseInt(in.readLine());
-        } catch (IOException e) {
-            System.out.println("Fehler beim Lesen der Eingabe: " + e);
-            System.exit(-1);
-        }
+//
+//        try {
+//
+//            System.out.println("Land: ");
+//            land = in.readLine();
+//            System.out.println("Anreise: (yy-mm-dd)");
+//            anreise = in.readLine();
+//            System.out.println("Abreise: (yy-mm-dd)");
+//            abreise = in.readLine();
+//            System.out.println("Ausstattung:");
+//            ausstattung = Integer.parseInt(in.readLine());
+//        } catch (IOException e) {
+//            System.out.println("Fehler beim Lesen der Eingabe: " + e);
+//            System.exit(-1);
+//        }
 
 
         System.out.println("");
@@ -48,25 +48,38 @@ public class Teil6 {
 
             stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
-//            String myUpdateQuery = "INSERT INTO pers(pnr, name, jahrg, eindat, gehalt, anr) " +
-//                    "VALUES('124', 'Huber', 1980, sysdate, 80000, 'K51')";                // Mitarbeiter hinzufügen
-//            stmt.executeUpdate(myUpdateQuery);
+            String myUpdateQuery = "INSERT INTO pers(pnr, name, jahrg, eindat, gehalt, anr) " +
+                    "VALUES('124', 'Huber', 1980, sysdate, 80000, 'K51')";                // Mitarbeiter hinzufügen
+            stmt.executeUpdate(myUpdateQuery);
 
-            String mySelectQuery = "select ort, count(ferienwid) as anzahl_pro_stadt\n" +
-                    "from dbsys26.Ferienwohnung inner join dbsys26.Adresse using(adressid)\n" +
-                    "group by ort \n" +
-                    "order by anzahl_pro_stadt desc; \n";
+            String mySelectQuery = "Select * from dbsys26.ferienwohnung";
+
+                    /*
+                    "select F.name, avg(B.sterne) as bewertung " +
+                    "from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
+                    "    inner join dbsys26.Adresse adr using(adressid) " +
+                    "    inner join dbsys26.Land L using(landid) " +
+                    "    inner join dbsys26.FerienAusstattung FA using(ferienwid) " +
+                    "where " +
+                    "    dbsys26.L.name = 'Deutschland'  " +
+                    "    AND FA.ausstattungsid = 2 " +
+                    "    AND F.name not in ( " +
+                    "        select  F.name " +
+                    "        from dbsys26.Buchung B right outer join dbsys26.Ferienwohnung F using(ferienwid) " +
+                    "        where ((b.anreise  between to_date('2015-01-01', 'yy-mm-dd') and to_DATE('2015-01-03', 'yy-mm-dd'))) " +
+                    "        OR ((b.abreise between to_date('2015-01-01', 'yy-mm-dd') and to_DATE('2015-01-03', 'yy-mm-dd'))) " +
+                    "        or (b.anreise < to_date('2015-01-01', 'yy-mm-dd') and b.abreise > to_DATE('2015-01-03', 'yy-mm-dd'))) " +
+                    "group by F.name " +
+                    "order by avg(B.sterne)";
+                  */
+
             rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
 
+            System.out.println("cccccc " + rset);
+
             while (rset.next())
-                System.out.println(rset.getInt("pnr") + " "
-                        + rset.getString("name") + " "
-                        + rset.getInt("jahrg") + " "
-                        + rset.getString("eindat") + " "
-                        + rset.getInt("gehalt") + " "
-                        + rset.getString("beruf") + " "
-                        + rset.getString("anr") + " "
-                        + rset.getInt("vnr"));
+                System.out.println(rset.getString("name")+
+                                    rset.getDouble("bewertung"));
 
 //            myUpdateQuery = "DELETE FROM pers WHERE pnr = '124'";
 //            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
