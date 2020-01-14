@@ -6,6 +6,9 @@ public class Teil6 {
 
         String name = null;
         String passwd = null;
+        String land, anreise, abreise;
+        int ausstattung = 0;
+
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Connection conn = null;
         Statement stmt = null;
@@ -16,6 +19,21 @@ public class Teil6 {
         name = "dbsys15";
         System.out.println("Passwort:");
         passwd = "lolsql";
+
+        try {
+
+            System.out.println("Land: ");
+            land = in.readLine();
+            System.out.println("Anreise:");
+            anreise = in.readLine();
+            System.out.println("Abreise:");
+            abreise = in.readLine();
+            System.out.println("Ausstattung:");
+            ausstattung = Integer.parseInt(in.readLine());
+        } catch (IOException e) {
+            System.out.println("Fehler beim Lesen der Eingabe: " + e);
+            System.exit(-1);
+        }
 
 
         System.out.println("");
