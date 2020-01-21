@@ -10,12 +10,12 @@ public class Teil6 {
         String land = null;
         String anreise = null;
         String abreise = null;
-        int ausstattung = -1;
+
 
         String email = "";
         String password = "";
         String fw = "";
-
+        String ausstattung = "";
 
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Connection conn = null;
@@ -37,9 +37,8 @@ public class Teil6 {
             System.out.println("Abreise: (yy-mm-dd)");
             abreise = in.readLine();
             System.out.println("Ausstattung:");
-            String tmp = in.readLine();
+            ausstattung = in.readLine();
 
-            if (!tmp.isEmpty()) ausstattung = Integer.parseInt(tmp);
         } catch (IOException e) {
             System.out.println("Fehler beim Lesen der Eingabe: " + e);
             System.exit(-1);
@@ -62,7 +61,17 @@ public class Teil6 {
 //            String myUpdateQuery = insertBuchung("2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
 //            stmt.executeUpdate(myUpdateQuery);
 
-            String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, ausstattung);
+            String aust = getAusstattungsId(ausstattung);
+            int austId = -1;
+            rset = stmt.executeQuery(aust);
+            int id = -1;
+            while (rset.next()) {
+                System.out.printf("%s \n", rset.getString("ausstattungsid"));
+                austId = Integer.parseInt(rset.getString("ausstattungsid"));
+            }
+
+
+            String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, austId);
             rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
 
             while (rset.next())
@@ -151,6 +160,10 @@ public class Teil6 {
             }
             System.exit(-1);
         }
+    }
+
+    private static String getAusstattungsId(String ausstattung) {
+        return "select A.ausstattungsid from dbsys26.ausstattung A where A.typ = '" + ausstattung + "'";
     }
 
 
