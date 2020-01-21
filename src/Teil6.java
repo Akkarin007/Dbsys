@@ -40,14 +40,6 @@ public class Teil6 {
             String tmp = in.readLine();
 
             if (!tmp.isEmpty()) ausstattung = Integer.parseInt(tmp);
-
-            System.out.println("e-mail:");
-            email = in.readLine();
-            System.out.println("password:");
-            password = in.readLine();
-            System.out.println("Ferienwohnung der zu buchenden Wohnung:");
-            fw = in.readLine();
-
         } catch (IOException e) {
             System.out.println("Fehler beim Lesen der Eingabe: " + e);
             System.exit(-1);
@@ -76,6 +68,56 @@ public class Teil6 {
             while (rset.next())
                 System.out.printf("%15s \t %.1f\n", rset.getString("name"), rset.getDouble("bewertung"));
 
+//            myUpdateQuery = "DELETE FROM dbsys26.buchung WHERE buchungsid = '99'";
+//            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
+
+
+            stmt.close();                                                                // Verbindung trennen
+            conn.commit();
+            conn.close();
+        } catch (SQLException se) {                                                        // SQL-Fehler abfangen
+            System.out.println();
+            System.out
+                    .println("SQL Exception occurred while establishing connection to DBS: "
+                            + se.getMessage());
+            System.out.println("- SQL state  : " + se.getSQLState());
+            System.out.println("- Message    : " + se.getMessage());
+            System.out.println("- Vendor code: " + se.getErrorCode());
+            System.out.println();
+            System.out.println("EXITING WITH FAILURE ... !!!");
+            System.out.println();
+            try {
+                conn.rollback();                                                        // Rollback durchführen
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            System.exit(-1);
+        }
+
+        try {
+            System.out.println("e-mail:");
+            email = in.readLine();
+            System.out.println("password:");
+            password = in.readLine();
+            System.out.println("Ferienwohnung der zu buchenden Wohnung:");
+            fw = in.readLine();
+
+        } catch (IOException e) {
+            System.out.println("Fehler beim Lesen der Eingabe: " + e);
+            System.exit(-1);
+        }
+        System.out.println("");
+
+        try {
+            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());                // Treiber laden
+            String url = "jdbc:oracle:thin:@oracle12c.in.htwg-konstanz.de:1521:ora12c"; // String für DB-Connection
+            conn = DriverManager.getConnection(url, name, passwd);                        // Verbindung erstellen
+
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);            // Transaction Isolations-Level setzen
+            conn.setAutoCommit(false);                                                    // Kein automatisches Commit
+
+            stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
+
             String kundenId = getKundenId(email, password);
             rset = stmt.executeQuery(kundenId);
             int id = -1;
@@ -85,7 +127,7 @@ public class Teil6 {
             }
 
 //            // 99, "2020-01-01", "2020-01-03", "Seehaus", 1  -> test eigaben
-            String buchungQuery = insertBuchung(anreise, abreise, "Seehaus", id);          // Mitarbeiter hinzufügen
+            String buchungQuery = insertBuchung(anreise, abreise, fw, id);          // Mitarbeiter hinzufügen
             stmt.executeUpdate(buchungQuery);
 
             stmt.close();                                                                // Verbindung trennen
@@ -110,6 +152,7 @@ public class Teil6 {
             System.exit(-1);
         }
     }
+
 
     private static String getKundenId(String email, String password) {
         return "select K.kundenid from dbsys26.kunde K where K.mailadresse = '" + email + "' AND " + "K.passwort = '" + password + "'";
