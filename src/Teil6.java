@@ -76,10 +76,6 @@ public class Teil6 {
             while (rset.next())
                 System.out.printf("%15s \t %.1f\n", rset.getString("name"), rset.getDouble("bewertung"));
 
-//            myUpdateQuery = "DELETE FROM dbsys26.buchung WHERE buchungsid = '99'";
-//            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
-
-
             String kundenId = getKundenId(email, password);
             rset = stmt.executeQuery(kundenId);
             int id = -1;
