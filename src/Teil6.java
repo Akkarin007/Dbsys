@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.sql.*;
 
@@ -10,6 +11,11 @@ public class Teil6 {
         String anreise = null;
         String abreise = null;
         int ausstattung = -1;
+
+        String email = "";
+        String password = "";
+        String fw = "";
+
 
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Connection conn = null;
@@ -32,7 +38,16 @@ public class Teil6 {
             abreise = in.readLine();
             System.out.println("Ausstattung:");
             String tmp = in.readLine();
+
             if (!tmp.isEmpty()) ausstattung = Integer.parseInt(tmp);
+
+            System.out.println("e-mail:");
+            email = in.readLine();
+            System.out.println("password:");
+            password = in.readLine();
+            System.out.println("Ferienwohnung der zu buchenden Wohnung:");
+            fw = in.readLine();
+
         } catch (IOException e) {
             System.out.println("Fehler beim Lesen der Eingabe: " + e);
             System.exit(-1);
@@ -51,8 +66,9 @@ public class Teil6 {
 
             stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
-            String myUpdateQuery = insertBuchung(90, "2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
-            stmt.executeUpdate(myUpdateQuery);
+//
+//            String myUpdateQuery = insertBuchung("2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
+//            stmt.executeUpdate(myUpdateQuery);
 
             String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, ausstattung);
             rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
@@ -62,6 +78,19 @@ public class Teil6 {
 
 //            myUpdateQuery = "DELETE FROM dbsys26.buchung WHERE buchungsid = '99'";
 //            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
+
+
+            String kundenId = getKundenId(email, password);
+            rset = stmt.executeQuery(kundenId);
+            int id = -1;
+            while (rset.next()) {
+                System.out.printf("%s \n", rset.getString("kundenid"));
+                id = Integer.parseInt(rset.getString("kundenid"));
+            }
+
+//            // 99, "2020-01-01", "2020-01-03", "Seehaus", 1  -> test eigaben
+            String buchungQuery = insertBuchung(anreise, abreise, "Seehaus", id);          // Mitarbeiter hinzufügen
+            stmt.executeUpdate(buchungQuery);
 
             stmt.close();                                                                // Verbindung trennen
             conn.commit();
@@ -86,9 +115,13 @@ public class Teil6 {
         }
     }
 
-    private static String insertBuchung(int buchungsid, String anreise, String abreise, String ferienwohnung, int kundenid) {
+    private static String getKundenId(String email, String password) {
+        return "select K.kundenid from dbsys26.kunde K where K.mailadresse = '" + email + "' AND " + "K.passwort = '" + password + "'";
+    }
+
+    private static String insertBuchung(String anreise, String abreise, String ferienwohnung, int kundenid) {
         return "INSERT INTO buchung (buchungsid, buchungsdatum, anreise, abreise, ferienwid, sterne, datumbewertung, rechnungsid, rechnungsdatum, rechnungsbetrag, kundenid) " +
-                "VALUES (" + buchungsid + ", to_date('2020-01-14', 'yy-mm-dd'), to_date('" + anreise + "', 'yy-mm-dd'), to_date('" + abreise + "', 'yy-mm-dd'), " +
+                "VALUES (null, to_date('2020-01-14', 'yy-mm-dd'), to_date('" + anreise + "', 'yy-mm-dd'), to_date('" + abreise + "', 'yy-mm-dd'), " +
                 "(select f.ferienwid from dbsys26.ferienwohnung f where f.name = '" + ferienwohnung + "'), " +
                 " null, null, " +
                 "rechungsseq.nextval, to_date('2015-02-10', 'yy-mm-dd'), 9999, " + kundenid + ") ";
@@ -117,3 +150,6 @@ public class Teil6 {
     }
 }
 
+
+//
+//
