@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.sql.*;
 
@@ -10,6 +11,11 @@ public class Teil6 {
         String anreise = null;
         String abreise = null;
         int ausstattung = -1;
+
+        String email = "";
+        String password = "";
+        String fw = "";
+
 
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         Connection conn = null;
@@ -32,7 +38,16 @@ public class Teil6 {
             abreise = in.readLine();
             System.out.println("Ausstattung:");
             String tmp = in.readLine();
+
             if (!tmp.isEmpty()) ausstattung = Integer.parseInt(tmp);
+
+            System.out.println("e-mail:");
+            email = in.readLine();
+            System.out.println("password:");
+            password = in.readLine();
+            System.out.println("Ferienwohnung der zu buchenden Wohnung:");
+            fw = in.readLine();
+
         } catch (IOException e) {
             System.out.println("Fehler beim Lesen der Eingabe: " + e);
             System.exit(-1);
@@ -51,51 +66,9 @@ public class Teil6 {
 
             stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
-            // Fw buchen
-            System.out.println("Für den Zeitraum eine Ferienwohnung buchen [J/N]?");
-            String buchen = "";
-            while(buchen.equals("j") || buchen.equals("J") || buchen.equals("N") || buchen.equals("n")) {
-                try {
-                    buchen = in.readLine();
-                } catch (IOException e) {
-                    System.out.println("Falsche eingabe!");
-                }
-            }
-            if (buchen.equals("j") || buchen.equals("J")) {
-                System.out.println("Hast du bereits eine Account");
-                String hasAccount = "";
-                while(buchen.equals("j") || buchen.equals("J") || buchen.equals("N") || buchen.equals("n")) {
-                    try {
-                        hasAccount = in.readLine();
-                    } catch (IOException e) {
-                        System.out.println("Falsche eingabe!");
-                    }
-                }
-                try {
-                    if (hasAccount.equals("j") || hasAccount.equals("J")) {
-                        String email = "";
-                        String password = "";
-                        String fw = "";
-                        System.out.println("e-mail:");
-                        email = in.readLine();
-                        System.out.println("password:");
-                        password = in.readLine();
-                        System.out.println("Ferienwohnung der zu buchenden Wohnung:");
-                        fw = in.readLine();
-                        int kundenid = 1;
-                        // 99, "2020-01-01", "2020-01-03", "Seehaus", 1  -> test eigaben
-                        String myUpdateQuery = insertBuchung(anreise, abreise, fw, kundenid);          // Mitarbeiter hinzufügen
-                        stmt.executeUpdate(myUpdateQuery);
-                    } else {
-
-                    }
-                } catch (IOException e){
-                    System.out.println("es gab einen Fehler bei der eingabe!");
-                }
-            }
-
-            String myUpdateQuery = insertBuchung("2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
-            stmt.executeUpdate(myUpdateQuery);
+//
+//            String myUpdateQuery = insertBuchung("2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
+//            stmt.executeUpdate(myUpdateQuery);
 
             String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, ausstattung);
             rset = stmt.executeQuery(mySelectQuery);                                    // Query ausführen
@@ -105,6 +78,19 @@ public class Teil6 {
 
 //            myUpdateQuery = "DELETE FROM dbsys26.buchung WHERE buchungsid = '99'";
 //            stmt.executeUpdate(myUpdateQuery);                                            // Mitarbeiter wieder löschen
+
+
+            String kundenId = getKundenId(email, password);
+            rset = stmt.executeQuery(kundenId);
+            int id = -1;
+            while (rset.next()) {
+                System.out.printf("%s \n", rset.getString("kundenid"));
+                id = Integer.parseInt(rset.getString("kundenid"));
+            }
+
+//            // 99, "2020-01-01", "2020-01-03", "Seehaus", 1  -> test eigaben
+            String buchungQuery = insertBuchung(anreise, abreise, "Seehaus", id);          // Mitarbeiter hinzufügen
+            stmt.executeUpdate(buchungQuery);
 
             stmt.close();                                                                // Verbindung trennen
             conn.commit();
@@ -127,6 +113,10 @@ public class Teil6 {
             }
             System.exit(-1);
         }
+    }
+
+    private static String getKundenId(String email, String password) {
+        return "select K.kundenid from dbsys26.kunde K where K.mailadresse = '" + email + "' AND " + "K.passwort = '" + password + "'";
     }
 
     private static String insertBuchung(String anreise, String abreise, String ferienwohnung, int kundenid) {
@@ -160,3 +150,6 @@ public class Teil6 {
     }
 }
 
+
+//
+//
