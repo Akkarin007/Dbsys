@@ -51,7 +51,50 @@ public class Teil6 {
 
             stmt = conn.createStatement();                                                // Statement-Objekt erzeugen
 
-            String myUpdateQuery = insertBuchung(99, "2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
+            // Fw buchen
+            System.out.println("Für den Zeitraum eine Ferienwohnung buchen [J/N]?");
+            String buchen = "";
+            while(buchen.equals("j") || buchen.equals("J") || buchen.equals("N") || buchen.equals("n")) {
+                try {
+                    buchen = in.readLine();
+                } catch (IOException e) {
+                    System.out.println("Falsche eingabe!");
+                }
+            }
+            if (buchen.equals("j") || buchen.equals("J")) {
+                System.out.println("Hast du bereits eine Account");
+                String hasAccount = "";
+                while(buchen.equals("j") || buchen.equals("J") || buchen.equals("N") || buchen.equals("n")) {
+                    try {
+                        hasAccount = in.readLine();
+                    } catch (IOException e) {
+                        System.out.println("Falsche eingabe!");
+                    }
+                }
+                try {
+                    if (hasAccount.equals("j") || hasAccount.equals("J")) {
+                        String email = "";
+                        String password = "";
+                        String fw = "";
+                        System.out.println("e-mail:");
+                        email = in.readLine();
+                        System.out.println("password:");
+                        password = in.readLine();
+                        System.out.println("Ferienwohnung der zu buchenden Wohnung:");
+                        fw = in.readLine();
+                        int kundenid = 1;
+                        // 99, "2020-01-01", "2020-01-03", "Seehaus", 1  -> test eigaben
+                        String myUpdateQuery = insertBuchung(anreise, abreise, fw, kundenid);          // Mitarbeiter hinzufügen
+                        stmt.executeUpdate(myUpdateQuery);
+                    } else {
+
+                    }
+                } catch (IOException e){
+                    System.out.println("es gab einen Fehler bei der eingabe!");
+                }
+            }
+
+            String myUpdateQuery = insertBuchung("2020-01-01", "2020-01-03", "Seehaus", 1);          // Mitarbeiter hinzufügen
             stmt.executeUpdate(myUpdateQuery);
 
             String mySelectQuery = sucheFerienWohnung(land, anreise, abreise, ausstattung);
@@ -86,9 +129,9 @@ public class Teil6 {
         }
     }
 
-    private static String insertBuchung(int buchungsid, String anreise, String abreise, String ferienwohnung, int kundenid) {
+    private static String insertBuchung(String anreise, String abreise, String ferienwohnung, int kundenid) {
         return "INSERT INTO buchung (buchungsid, buchungsdatum, anreise, abreise, ferienwid, sterne, datumbewertung, rechnungsid, rechnungsdatum, rechnungsbetrag, kundenid) " +
-                "VALUES (" + buchungsid + ", to_date('2020-01-14', 'yy-mm-dd'), to_date('" + anreise + "', 'yy-mm-dd'), to_date('" + abreise + "', 'yy-mm-dd'), " +
+                "VALUES (null, to_date('2020-01-14', 'yy-mm-dd'), to_date('" + anreise + "', 'yy-mm-dd'), to_date('" + abreise + "', 'yy-mm-dd'), " +
                 "(select f.ferienwid from dbsys26.ferienwohnung f where f.name = '" + ferienwohnung + "'), " +
                 " null, null, " +
                 "rechungsseq.nextval, to_date('2015-02-10', 'yy-mm-dd'), 9999, " + kundenid + ") ";
